@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcoming Events - EventSphere</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background: #0f172a; 
+            transition: background 0.5s ease; 
+        }
+        body.light-mode { 
+            background: #f1f5f9; 
+            color: #1f2937; 
+        }
+        .bg-orbit { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(15, 23, 42, 0.9) 70%); 
+            animation: orbit 15s linear infinite; 
+        }
+        body.light-mode .bg-orbit { 
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 0%, rgba(241, 245, 249, 0.9) 70%); 
+        }
+        .navbar { 
+            background: linear-gradient(90deg, #3b82f6, #9333ea); 
+            animation: slideIn 1s ease-out; 
+        }
+        body.light-mode .navbar { 
+            background: linear-gradient(90deg, #60a5fa, #a855f7); 
+        }
+        .event-card { 
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2)); 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            transition: transform 1s ease-in-out; 
+            transform-style: preserve-3d; 
+            animation: pulseGlow 2s ease-in-out infinite; 
+            position: relative; 
+            height: 500px; 
+        }
+        body.light-mode .event-card { 
+            background: linear-gradient(135deg, rgba(147, 197, 253, 0.2), rgba(221, 214, 254, 0.2)); 
+            border: 1px solid rgba(0, 0, 0, 0.2); 
+        }
+        .event-card:hover { 
+            transform: rotateY(180deg); 
+        }
+        .event-card:hover .no-flip:hover { 
+            transform: none; 
+        }
+        .event-card .front, .event-card .back { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            backface-visibility: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 1.5rem; 
+            overflow-y: auto; 
+        }
+        .event-card .front { 
+            z-index: 2; 
+        }
+        body.light-mode .event-card .front { 
+            color: #1f2937; 
+        }
+        .event-card .back { 
+            background: #9333ea; 
+            transform: rotateY(180deg); 
+            overflow: hidden; 
+        }
+        body.light-mode .event-card .back { 
+            background: #a855f7; 
+        }
+        .event-card .back img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+        .event-details { 
+            flex-grow: 1; 
+            text-align: center; 
+            overflow-wrap: break-word; 
+        }
+        .event-details p { 
+            margin-bottom: 0.5rem; 
+            font-size: 0.9rem; 
+        }
+        .register-btn { 
+            background: linear-gradient(90deg, #3b82f6, #9333ea); 
+            transition: all 0.3s ease; 
+            z-index: 10; 
+            width: 100%; 
+            padding: 0.75rem; 
+        }
+        body.light-mode .register-btn { 
+            background: linear-gradient(90deg, #60a5fa, #a855f7); 
+        }
+        .register-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.5); 
+        }
+        .refresh-btn { 
+            background: linear-gradient(90deg, #22c55e, #06b6d4); 
+            transition: all 0.3s ease; 
+        }
+        body.light-mode .refresh-btn { 
+            background: linear-gradient(90deg, #4ade80, #22d3ee); 
+        }
+        .refresh-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(6, 182, 212, 0.5); 
+        }
+        .toggle-container { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 20; 
+        }
+        .toggle-slider { 
+            width: 60px; 
+            height: 30px; 
+            background: #4b5563; 
+            border-radius: 15px; 
+            position: relative; 
+            cursor: pointer; 
+            transition: background 0.3s ease; 
+        }
+        body.light-mode .toggle-slider { 
+            background: #d1d5db; 
+        }
+        .toggle-slider::before { 
+            content: '☾'; 
+            position: absolute; 
+            width: 26px; 
+            height: 26px; 
+            background: #fff; 
+            border-radius: 50%; 
+            top: 2px; 
+            left: 2px; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 16px; 
+            color: #1f2937; 
+        }
+        body.light-mode .toggle-slider::before { 
+            content: '☀'; 
+            left: 32px; 
+        }
+        @media (max-width: 768px) {
+            .event-card:hover {
+                transform: none; 
+            }
+            .event-card {
+                height: 450px; 
+            }
+            .event-details p {
+                font-size: 0.85rem; 
+            }
+        }
+        @keyframes orbit { 
+            0% { transform: rotate(0deg) translateX(50px) rotate(0deg); } 
+            100% { transform: rotate(360deg) translateX(50px) rotate(-360deg); } 
+        }
+        @keyframes pulseGlow { 
+            0% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); } 
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); } 
+            100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); } 
+        }
+        body.light-mode .event-card { 
+            animation: pulseGlowLight 2s ease-in-out infinite; 
+        }
+        @keyframes pulseGlowLight { 
+            0% { box-shadow: 0 0 10px rgba(147, 197, 253, 0.3); } 
+            50% { box-shadow: 0 0 20px rgba(147, 197, 253, 0.6); } 
+            100% { box-shadow: 0 0 10px rgba(147, 197, 253, 0.3); } 
+        }
+        @keyframes slideIn { 
+            0% { transform: translateY(-100%); opacity: 0; } 
+            100% { transform: translateY(0); opacity: 1; } 
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white relative">
+    <div class="bg-orbit"></div>
+    <nav class="navbar fixed top-0 w-full py-4 shadow-lg z-10">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="events.html" class="text-3xl font-extrabold text-white">EventSphere</a>
+            <div class="space-x-8">
+                <a href="events.html" class="text-lg font-medium text-white hover:text-gray-200">Home</a>
+                <a href="#" id="logout" class="text-lg font-medium text-white hover:text-gray-200">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <div class="toggle-container">
+        <div class="toggle-slider" id="theme-toggle"></div>
+    </div>
+    <div class="container mx-auto px-4 pt-24 pb-8 z-10 relative">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-center">Upcoming Events</h1>
+            <button id="refresh-btn" class="refresh-btn py-2 px-4 text-white font-semibold rounded-lg">Refresh Events</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="event-grid"></div>
+    </div>
+    <script>
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('logout').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        });
+
+        let events = JSON.parse(localStorage.getItem('events')) || [];
+        console.log('Initial events loaded in events.html:', events);
+        const eventGrid = document.getElementById('event-grid');
+
+        function renderEvents() {
+            console.log('Rendering events:', events);
+            eventGrid.innerHTML = '';
+            if (events.length === 0) {
+                eventGrid.innerHTML = '<p class="text-center col-span-full text-gray-300">No upcoming events available.</p>';
+                return;
+            }
+            events.forEach(event => {
+                console.log('Rendering event:', event);
+                const card = document.createElement('div');
+                card.className = 'event-card rounded-lg';
+                card.innerHTML = `
+                    <div class="front">
+                        <div class="event-details">
+                            <h2 class="text-2xl font-semibold mb-2">${event.name || 'Unnamed Event'}</h2>
+                            <p>Date: ${event.date ? new Date(event.date).toLocaleDateString() : 'TBD'}</p>
+                            <p>Coordinator: ${event.coordinatorName || 'N/A'}</p>
+                            <p>Contact: ${event.coordinatorContact || 'N/A'}</p>
+                            <p>WhatsApp Group: <a href="${event.whatsappLink || '#'}" target="_blank" class="underline hover:text-purple-400">${event.whatsappLink ? 'Join' : 'N/A'}</a></p>
+                        </div>
+                        <button class="register-btn py-2 text-white font-semibold rounded-lg no-flip" data-event="${event.name || 'Unnamed Event'}">Register</button>
+                    </div>
+                    <div class="back">
+                        <img src="${event.poster || 'https://via.placeholder.com/500?text=No+Poster+Available'}" alt="${event.name || 'Unnamed Event'} Poster" onerror="this.src='https://via.placeholder.com/500?text=Image+Load+Failed'">
+                    </div>
+                `;
+                eventGrid.appendChild(card);
+            });
+
+            // Update register buttons
+            document.querySelectorAll('.register-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const eventName = button.getAttribute('data-event');
+                    window.location.href = `event_register.html?event=${encodeURIComponent(eventName)}`;
+                });
+            });
+        }
+
+        // Initial render
+        renderEvents();
+
+        // Fix Refresh button
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            try {
+                const updatedEvents = JSON.parse(localStorage.getItem('events')) || [];
+                console.log('Events after manual refresh:', updatedEvents);
+                events = updatedEvents; // Update the global events array
+                renderEvents(); // Re-render the events
+            } catch (error) {
+                console.error('Error refreshing events:', error);
+                alert('Failed to refresh events. Please try again.');
+            }
+        });
+
+        // Listen for storage changes (e.g., from admin.html)
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'events') {
+                console.log('Storage event triggered in events.html:', event.newValue);
+                try {
+                    events = JSON.parse(event.newValue) || [];
+                    renderEvents();
+                } catch (error) {
+                    console.error('Error handling storage event:', error);
+                }
+            }
+        });
+
+        // Theme toggle
+        const toggle = document.getElementById('theme-toggle');
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        });
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+</body>
+</html>

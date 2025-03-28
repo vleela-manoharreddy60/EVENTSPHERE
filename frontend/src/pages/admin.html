@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - EventSphere</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background: #0f2a17; 
+            transition: background 0.5s ease; 
+        }
+        body.light-mode { 
+            background: #ecfdf5; 
+            color: #1f2937; 
+        }
+        .bg-orbit { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(15, 42, 23, 0.9) 70%); 
+            animation: orbit 15s linear infinite; 
+        }
+        body.light-mode .bg-orbit { 
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 0%, rgba(236, 253, 245, 0.9) 70%); 
+        }
+        .form-container { 
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(6, 182, 212, 0.2)); 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            animation: pulseGlow 2s ease-in-out infinite; 
+            z-index: 2; 
+        }
+        body.light-mode .form-container { 
+            background: linear-gradient(135deg, rgba(167, 243, 208, 0.2), rgba(165, 243, 250, 0.2)); 
+            border: 1px solid rgba(0, 0, 0, 0.2); 
+        }
+        .form-input { 
+            transition: all 0.3s ease; 
+            background: rgba(31, 41, 55, 0.9); 
+        }
+        body.light-mode .form-input { 
+            background: rgba(255, 255, 255, 0.9); 
+            color: #1f2937; 
+        }
+        .form-input:focus { 
+            border-color: #06b6d4; 
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5); 
+            transform: scale(1.02); 
+        }
+        .submit-btn { 
+            background: linear-gradient(90deg, #22c55e, #06b6d4); 
+            transition: all 0.3s ease; 
+        }
+        body.light-mode .submit-btn { 
+            background: linear-gradient(90deg, #4ade80, #22d3ee); 
+        }
+        .submit-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(6, 182, 212, 0.5); 
+        }
+        .delete-btn { 
+            background: linear-gradient(90deg, #ef4444, #dc2626); 
+            transition: all 0.3s ease; 
+        }
+        body.light-mode .delete-btn { 
+            background: linear-gradient(90deg, #f87171, #ef4444); 
+        }
+        .delete-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.5); 
+        }
+        .event-card, .log-card { 
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(6, 182, 212, 0.1)); 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            animation: pulseGlow 2s ease-in-out infinite; 
+        }
+        body.light-mode .event-card, body.light-mode .log-card { 
+            background: linear-gradient(135deg, rgba(167, 243, 208, 0.1), rgba(165, 243, 250, 0.1)); 
+            border: 1px solid rgba(0, 0, 0, 0.2); 
+        }
+        .toggle-container { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 20; 
+        }
+        .toggle-slider { 
+            width: 60px; 
+            height: 30px; 
+            background: #4b5563; 
+            border-radius: 15px; 
+            position: relative; 
+            cursor: pointer; 
+            transition: background 0.3s ease; 
+        }
+        body.light-mode .toggle-slider { 
+            background: #d1d5db; 
+        }
+        .toggle-slider::before { 
+            content: '☾'; 
+            position: absolute; 
+            width: 26px; 
+            height: 26px; 
+            background: #fff; 
+            border-radius: 50%; 
+            top: 2px; 
+            left: 2px; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 16px; 
+            color: #1f2937; 
+        }
+        body.light-mode .toggle-slider::before { 
+            content: '☀'; 
+            left: 32px; 
+        }
+        .navbar { 
+            background: linear-gradient(90deg, #22c55e, #06b6d4); 
+            animation: slideIn 1s ease-out; 
+        }
+        body.light-mode .navbar { 
+            background: linear-gradient(90deg, #4ade80, #22d3ee); 
+        }
+        @keyframes orbit { 
+            0% { transform: rotate(0deg) translateX(50px) rotate(0deg); } 
+            100% { transform: rotate(360deg) translateX(50px) rotate(-360deg); } 
+        }
+        @keyframes pulseGlow { 
+            0% { box-shadow: 0 0 10px rgba(6, 182, 212, 0.3); } 
+            50% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.6); } 
+            100% { box-shadow: 0 0 10px rgba(6, 182, 212, 0.3); } 
+        }
+        @keyframes slideIn { 
+            0% { transform: translateY(-100%); opacity: 0; } 
+            100% { transform: translateY(0); opacity: 1; } 
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white relative">
+    <div class="bg-orbit"></div>
+    <nav class="navbar fixed top-0 w-full py-4 shadow-lg z-10">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="admin.html" class="text-3xl font-extrabold text-white">EventSphere Admin</a>
+            <div class="space-x-8">
+                <a href="events.html" class="text-lg font-medium text-white hover:text-gray-200">View Events</a>
+                <a href="#" id="logout" class="text-lg font-medium text-white hover:text-gray-200">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <div class="toggle-container">
+        <div class="toggle-slider" id="theme-toggle"></div>
+    </div>
+    <div class="container mx-auto px-4 pt-24 pb-8 z-10 relative">
+        <div class="form-container w-full max-w-md p-8 rounded-xl shadow-2xl mx-auto">
+            <h2 class="text-3xl font-extrabold text-center mb-6 tracking-tight">Add Event (Admin)</h2>
+            <form id="event-form">
+                <div class="mb-4">
+                    <label for="event-name" class="block text-sm font-medium mb-2 text-gray-200">Event Name</label>
+                    <input type="text" id="event-name" name="event-name" class="form-input w-full p-3 rounded-lg text-white border border-gray-700 focus:outline-none" placeholder="Enter event name" required>
+                </div>
+                <div class="mb-4">
+                    <label for="event-date" class="block text-sm font-medium mb-2 text-gray-200">Event Date</label>
+                    <input type="date" id="event-date" name="event-date" class="form-input w-full p-3 rounded-lg text-white border border-gray-700 focus:outline-none" required>
+                </div>
+                <div class="mb-4">
+                    <label for="coordinator-name" class="block text-sm font-medium mb-2 text-gray-200">Coordinator Name</label>
+                    <input type="text" id="coordinator-name" name="coordinator-name" class="form-input w-full p-3 rounded-lg text-white border border-gray-700 focus:outline-none" placeholder="Enter coordinator name" required>
+                </div>
+                <div class="mb-4">
+                    <label for="coordinator-contact" class="block text-sm font-medium mb-2 text-gray-200">Coordinator Contact</label>
+                    <input type="tel" id="coordinator-contact" name="coordinator-contact" class="form-input w-full p-3 rounded-lg text-white border border-gray-700 focus:outline-none" placeholder="Enter coordinator contact" pattern="[0-9]{10}" required>
+                </div>
+                <div class="mb-4">
+                    <label for="event-poster" class="block text-sm font-medium mb-2 text-gray-200">Poster URL</label>
+                    <input type="url" id="event-poster" name="event-poster" class="form-input w-full p-3 rounded-lg text-white border border-gray-700 focus:outline-none" placeholder="Enter poster image URL" required>
+                </div>
+                <div class="mb-4">
+                    <label for="phonepe-screenshot" class="block text-sm font-medium mb-2 text-gray-200">PhonePe Screenshot (Upload)</label>
+                    <input type="file" id="phonepe-screenshot" name="phonepe-screenshot" class="form-input w-full p-3 rounded-lg text-white border border-gray-700 focus:outline-none" accept="image/*" required>
+                </div>
+                <div class="mb-6">
+                    <label for="whatsapp-link" class="block text-sm font-medium mb-2 text-gray-200">WhatsApp Group Link</label>
+                    <input type="url" id="whatsapp-link" name="whatsapp-link" class="form-input w-full p-3 rounded-lg text-white border border-gray-700 focus:outline-none" placeholder="Enter WhatsApp group link" required>
+                </div>
+                <button type="submit" class="submit-btn w-full py-3 text-white font-semibold rounded-lg">Add Event</button>
+            </form>
+        </div>
+        <div class="mt-8">
+            <h2 class="text-3xl font-extrabold text-center mb-6 tracking-tight">Manage Events</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="event-grid"></div>
+        </div>
+        <div class="mt-8">
+            <h2 class="text-3xl font-extrabold text-center mb-6 tracking-tight">Activity Log</h2>
+            <div class="grid grid-cols-1 gap-4" id="activity-log"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        // Logout functionality
+        document.getElementById('logout').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        });
+
+        // Load events and activity log
+        let events = JSON.parse(localStorage.getItem('events')) || [];
+        let activityLog = JSON.parse(localStorage.getItem('activityLog')) || [];
+        const eventGrid = document.getElementById('event-grid');
+        const activityLogContainer = document.getElementById('activity-log');
+
+        // Function to render events in admin panel
+        function renderEvents() {
+            eventGrid.innerHTML = '';
+            if (events.length === 0) {
+                eventGrid.innerHTML = '<p class="text-center col-span-full text-gray-300">No events available.</p>';
+                return;
+            }
+            events.forEach((event, index) => {
+                const card = document.createElement('div');
+                card.className = 'event-card p-6 rounded-lg';
+                card.innerHTML = `
+                    <h3 class="text-xl font-semibold mb-2">${event.name || 'Unnamed Event'}</h3>
+                    <p class="mb-2 text-gray-200">Date: ${event.date ? new Date(event.date).toLocaleDateString() : 'TBD'}</p>
+                    <p class="mb-2 text-gray-200">Coordinator: ${event.coordinatorName || 'N/A'}</p>
+                    <p class="mb-2 text-gray-200">Contact: ${event.coordinatorContact || 'N/A'}</p>
+                    <p class="mb-2 text-gray-200">Poster: <a href="${event.poster}" target="_blank" class="underline hover:text-cyan-400">View Poster</a></p>
+                    <p class="mb-2 text-gray-200">PhonePe Screenshot: <a href="${event.phonepeScreenshot || '#'}" target="_blank" class="underline hover:text-cyan-400">${event.phonepeScreenshot ? 'View' : 'N/A'}</a></p>
+                    <p class="mb-4 text-gray-200">WhatsApp Group: <a href="${event.whatsappLink || '#'}" target="_blank" class="underline hover:text-cyan-400">${event.whatsappLink ? 'Join' : 'N/A'}</a></p>
+                    <button class="delete-btn w-full py-2 text-white font-semibold rounded-lg" data-index="${index}">Delete</button>
+                `;
+                eventGrid.appendChild(card);
+            });
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = e.target.getAttribute('data-index');
+                    const deletedEvent = events[index];
+                    events.splice(index, 1); // Remove event from array
+                    localStorage.setItem('events', JSON.stringify(events)); // Update localStorage
+                    alert('Event deleted successfully!');
+                    // Log the action
+                    logAction('Event Deleted', deletedEvent);
+                    renderEvents(); // Re-render the event list
+                });
+            });
+        }
+
+        // Function to log actions to the activity log
+        function logAction(action, event) {
+            const timestamp = new Date().toLocaleString();
+            const logEntry = {
+                action: action,
+                eventName: event.name || 'Unnamed Event',
+                date: event.date ? new Date(event.date).toLocaleDateString() : 'TBD',
+                coordinatorName: event.coordinatorName || 'N/A',
+                coordinatorContact: event.coordinatorContact || 'N/A',
+                poster: event.poster || 'N/A',
+                phonepeScreenshot: event.phonepeScreenshot || 'N/A',
+                whatsappLink: event.whatsappLink || 'N/A',
+                timestamp: timestamp
+            };
+            activityLog.unshift(logEntry); // Add to the beginning of the log
+            if (activityLog.length > 10) {
+                activityLog.pop(); // Keep only the latest 10 entries
+            }
+            localStorage.setItem('activityLog', JSON.stringify(activityLog));
+            renderActivityLog();
+        }
+
+        // Function to render the activity log
+        function renderActivityLog() {
+            activityLogContainer.innerHTML = '';
+            if (activityLog.length === 0) {
+                activityLogContainer.innerHTML = '<p class="text-center col-span-full text-gray-300">No activity logged yet.</p>';
+                return;
+            }
+            activityLog.forEach(log => {
+                const logCard = document.createElement('div');
+                logCard.className = 'log-card p-4 rounded-lg';
+                logCard.innerHTML = `
+                    <p class="text-lg font-semibold text-cyan-400">${log.action}</p>
+                    <p class="text-gray-200">Event: ${log.eventName}</p>
+                    <p class="text-gray-200">Date: ${log.date}</p>
+                    <p class="text-gray-200">Coordinator: ${log.coordinatorName}</p>
+                    <p class="text-gray-200">Contact: ${log.coordinatorContact}</p>
+                    <p class="text-gray-200">Poster: <a href="${log.poster}" target="_blank" class="underline hover:text-cyan-400">${log.poster === 'N/A' ? 'N/A' : 'View'}</a></p>
+                    <p class="text-gray-200">PhonePe Screenshot: <a href="${log.phonepeScreenshot}" target="_blank" class="underline hover:text-cyan-400">${log.phonepeScreenshot === 'N/A' ? 'N/A' : 'View'}</a></p>
+                    <p class="text-gray-200">WhatsApp Group: <a href="${log.whatsappLink}" target="_blank" class="underline hover:text-cyan-400">${log.whatsappLink === 'N/A' ? 'N/A' : 'Join'}</a></p>
+                    <p class="text-gray-400 text-sm mt-2">Timestamp: ${log.timestamp}</p>
+                `;
+                activityLogContainer.appendChild(logCard);
+            });
+        }
+
+        // Initial render
+        renderEvents();
+        renderActivityLog();
+
+        // Event form submission (Add Event)
+        document.getElementById('event-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newEvent = {
+                name: document.getElementById('event-name').value,
+                date: document.getElementById('event-date').value,
+                coordinatorName: document.getElementById('coordinator-name').value,
+                coordinatorContact: document.getElementById('coordinator-contact').value,
+                poster: document.getElementById('event-poster').value,
+                phonepeScreenshot: document.getElementById('phonepe-screenshot').value,
+                whatsappLink: document.getElementById('whatsapp-link').value
+            };
+            events.push(newEvent);
+            localStorage.setItem('events', JSON.stringify(events));
+            alert('Event added successfully!');
+            // Log the action
+            logAction('Event Added', newEvent);
+            document.getElementById('event-form').reset();
+            renderEvents(); // Update the event list
+        });
+
+        // Listen for storage changes (e.g., from another tab)
+        window.addEventListener('storage', () => {
+            events = JSON.parse(localStorage.getItem('events')) || [];
+            activityLog = JSON.parse(localStorage.getItem('activityLog')) || [];
+            renderEvents();
+            renderActivityLog();
+        });
+
+        // Theme toggle
+        const toggle = document.getElementById('theme-toggle');
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        });
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+</body>
+</html>
